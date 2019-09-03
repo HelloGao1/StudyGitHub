@@ -1,0 +1,23 @@
+<Patient xmlns="http://hl7.org/fhir">
+  <id value="4" />
+  <meta>
+    <versionId value="1" />
+  </meta>
+  <identifier id="4">
+    <type>
+      <coding>
+        <code value="MR" />
+      </coding>
+      <text value="Medical record number" />
+    </type>
+    <value value="N000001865" />
+  </identifier>
+  <active value="true" />
+  <name>
+    <family value="TEST" />
+    <given value="PACS" />
+    <given value="ONE" />
+  </name>
+  <gender value="female" />
+  <birthDate value="1970-06-04" />
+</Patient>

@@ -1,0 +1,308 @@
+﻿@model IList<Partner.Data.Integration.Models.PatientViewModel>
+
+@{
+    ViewBag.Title = "Patient List";
+}
+
+<h4>Patient List</h4>
+
+<div class="tablebox">
+    <div class="toolbar">
+        <button id="btn-Add" class="btn btn-Add" onclick="ShowSearch()"><i class="fa fa-plus"></i> Add Patient</button>
+    </div>
+    <div class="win-dialog" id="PatientDialog">
+        <div class="win-header">
+            <span class="close float-left" onclick="closeDialog()">
+                <i class="fa fa-window-close"></i>
+            </span>
+            <div class="dropdown float-right">
+                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="width:150px;">
+                    Search by Name
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a href="#" data-value="Name" class="searchName">Search by name <i class="fa fa-check"></i></a></li>
+                    <li><a href="#" data-value="Id">Search by ID</a></li>
+                    <li><a href="#" data-value="MRN">Search by MRN</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="win-content" id="PatientSearch" style="min-height:360px;">
+            Loading...
+        </div>
+        @*<div class="win-footer">
+            </div>*@
+    </div>
+    <table id="patientList"
+           data-toolbar=".toolbar"
+           data-toggle="table"
+           data-show-columns="true"
+           data-height="600"
+           data-single-select="true"
+           data-click-to-select="true"
+           data-pagination="true"
+           data-page-size="10"
+           data-url="/Patient/List"
+           class="table table-striped">
+        <thead>
+            <tr>
+                <th data-field="state" data-checkbox="true" class="hide"></th>
+                <th data-field="Id" data-sortable="true" data-width="30" data-width-unit="px">ID</th>
+                <th data-field="FullName" data-sortable="true">Name</th>
+                <th data-field="DOBFormatted" data-sortable="true">DOB</th>
+                <th data-field="Age" data-sortable="true">Age</th>
+                <th data-field="Gender" data-sortable="true">Gender</th>
+                <th data-field="MRN" data-sortable="true">MRN</th>
+                <th data-formatter="removeFormatter" data-width="60" data-width-unit="px"></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<div class="tablebox flex">
+    <div class="win-dialog" id="PatientDetailsDialog">
+        <div class="win-header">
+            <span class="close float-left" onclick="closeDialog()">
+                <i class="fa fa-window-close"></i>
+            </span>
+        </div>
+        <div class="win-content" id="divPatientDetails" style="min-height:360px;padding:10px 0;">
+            <iframe id="patientDetails" frameborder="0" allowtransparency="true" style="width:100%; min-height:100%;"></iframe>
+        </div>
+    </div>
+</div>
+<div id="removePatientModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Remove Patient</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove the patient from list?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="RemovePatientFromList()">Yes</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/Scripts/bootstrap-table.min.js")
+    <script type="text/javascript">
+        microsoftTeams.initialize();
+
+        function editFormatter(value, row) {
+            return '<i class="fa fa-plus" onclick="AddPatientToList(' + row.CDRId + ')" title="Add Patient to List"></i> ';
+        }
+        function removeFormatter(value, row) {
+            return '<i class="fa fa-remove" onclick="ShowRemovePatientDialog(' + row.CDRId + ')" title="Remove Patient from List"></i> ';
+        }
+        //Search Patient
+
+        function ShowSearch() {
+            $("#PatientSearch").html('Loading...');
+            $.ajax({
+                url: "/Patient/SearchPatient",
+                dataType: "html",
+                type: "Get",
+                cache: false,
+                data: null,
+                beforeSend: showLoading,
+                success: function (data) {
+                    showDialog('#PatientDialog');
+                    $("#PatientSearch").html(data);
+
+
+                    $('.datepicker').datepicker({
+                        format: 'yyyy-mm-dd', //choose the date format you prefer
+                        orientation: 'left bottom',
+                        autoclose: true,
+                        todayHighlight: true
+                    });
+
+                    $(".dropdown-menu li a").click(function () {
+                        $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+                        $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+
+                        $(".searchDiv").hide();
+                        var selected = $(this).data('value');
+                        $("#divSearch" + selected).show();
+
+                        $(this).parents(".dropdown").find('.dropdown-menu li a i').remove();
+                        $(this).html($(this).html() + " <i class='fa fa-check'>");
+
+                        $('#SearchForm')[0].reset();
+                    });
+                    //init the search table
+                    $('#searchPatientList').bootstrapTable({
+                        url: "/Patient/SearchPatientList?id=0",
+                        method: 'GET',
+                        cache: false,
+                        pagination: true,
+                        sortable: true,
+                        sortOrder: "asc",
+                        sidePagination: "client",
+                        pageNumber: 1,
+                        pageSize: 5,
+                        pageList: [5, 10, 25, 50, 100],
+                        search: false,
+                        strictSearch: false,
+                        showColumns: false,
+                        showRefresh: false,
+                        minimumCountColumns: 1,
+                        clickToSelect: true,
+                        uniqueId: "CDRId",
+                        showToggle: false,
+                        cardView: false,
+                        detailView: false,
+                        singleSelect: true,
+                        onPostHeader: function () {
+                            $("#searchPatientList tbody tr").removeClass("selected");
+                            $("#searchPatientList tbody tr").css('cursor', 'pointer');
+                        },
+                        columns: [{
+                            field: 'Id',
+                            title: 'ID'
+                        },
+                        {
+                            field: 'CDRId',
+                            title: 'ID',
+                            width: '50'
+                        },
+                        {
+                            field: 'FullName',
+                            title: 'Name'
+                        },
+                        {
+                            field: 'DOBFormatted',
+                            title: 'DOB'
+                        },
+                        {
+                            field: 'Gender',
+                            title: 'Gender',
+                            align: 'center'
+                        },
+                        {
+                            field: 'MRN',
+                            title: 'MRN',
+                            align: 'center'
+                        },
+                        {
+                            field: 'oper',
+                            title: '',
+                            align: 'center',
+                            events: null,
+                            formatter: function (value, row, index) {
+                                return editFormatter(value, row);
+                            }
+                        }]
+                    });
+
+                    //reset search type
+                    $('.dropdown-toggle').html('Search by Name <span class="caret"></span>');
+                    $(".dropdown-menu li a i").remove();
+                    $(".searchName").html($(".searchName").html() + " <i class='fa fa-check'>");
+
+                    $.validator.unobtrusive.parse($("#PatientSearch"));
+                },
+                error: function (data) {
+                    hideLoading();
+                },
+                complete: hideLoading
+            });
+        };
+
+        function onSearch() {
+            var form = $("#SearchForm");
+            if (form.valid()) {
+
+                var url = '/Patient/SearchPatientList?';
+                if ($("#txtId").val().trim() != "")
+                    url += "id=" + $("#txtId").val().trim() + "&";
+                if ($("#txtFamilyName").val().trim() != "")
+                    url += "familyName=" + $("#txtFamilyName").val().trim() + "&";
+                if ($("#txtGivenName").val().trim() != "")
+                    url += "givenName=" + $("#txtGivenName").val().trim() + "&";
+                if ($("#txtDOB").val().trim() != "")
+                    url += "dob=" + $("#txtDOB").val().trim() + "&";
+                if ($("#txtMRN").val().trim() != "")
+                    url += "mrn=" + $("#txtMRN").val().trim() + "&";
+                if ($("#ddlGender").val().trim() != "")
+                    url += "gender=" + $("#ddlGender").val().trim() + "&";
+
+                var table_options = $('#searchPatientList').bootstrapTable('getOptions');
+                table_options.url = url;
+
+                $('#searchPatientList').bootstrapTable('refresh', table_options);
+
+            }
+        }
+
+        function AddPatientToList(id) {
+            $.ajax({
+                url: "/Patient/AddPatientToList?id=" + id,
+                type: "GET",
+                data: null,
+                beforeSend: showLoading,
+                success: function (data) {
+                    closeDialog();
+                    $("#patientList").bootstrapTable('refresh');
+                },
+                error: function (data) {
+
+                },
+                complete: hideLoading
+            });
+        }
+
+        function ShowRemovePatientDialog(id) {
+            currentPatientId = id;
+            $('#removePatientModal').modal('show');
+        }
+
+        function RemovePatientFromList() {
+            $('#removePatientModal').modal('hide');
+            $.ajax({
+                url: "/Patient/RemovePatientFromList?id=" + currentPatientId,
+                type: "GET",
+                data: null,
+                beforeSend: showLoading,
+                success: function (data) {
+                    closeDialog();
+                    $("#patientList").bootstrapTable('refresh');
+                },
+                error: function (data) {
+                    closeDialog();
+                    hideLoading();
+                },
+                complete: hideLoading
+            });
+        }
+
+        $('#patientList').bootstrapTable({
+            onDblClickRow: function (row, element, field) {
+            },
+
+            onClickRow: function (row, element, field) {
+                if (field != 7) {
+                    $("#patientDetails").attr('src', 'about:blank');
+                    var url = $("#GLOBAL_WebPATH").val() + "Patient/Details/" + row.CDRId;
+                    $("#patientDetails").attr('src', url);
+                    showLoading();
+                    showDialog("#PatientDetailsDialog");
+                }
+            },
+            onPostHeader: function () {
+                $("#patientList tbody tr").css('cursor', 'pointer');
+            }
+        });
+
+    </script>
+}
+
+

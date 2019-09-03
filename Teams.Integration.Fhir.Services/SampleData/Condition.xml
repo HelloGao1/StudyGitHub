@@ -1,0 +1,58 @@
+﻿<Condition xmlns="http://hl7.org/fhir">
+  <!-- from Resource: id, meta, implicitRules, and language -->
+  <!-- from DomainResource: text, contained, extension, and modifierExtension -->
+  <identifier>
+    <!-- 0..* Identifier External Ids for this condition -->
+  </identifier>
+  <clinicalStatus value="[code]"/><!-- ?? 0..1 active | recurrence | inactive | remission | resolved -->
+  <verificationStatus value="[code]"/><!-- ?? 0..1 provisional | differential | confirmed | refuted | entered-in-error | unknown -->
+  <category>
+    <!-- 0..* CodeableConcept problem-list-item | encounter-diagnosis -->
+  </category>
+  <severity>
+    <!-- 0..1 CodeableConcept Subjective severity of condition -->
+  </severity>
+  <code>
+    <!-- 0..1 CodeableConcept Identification of the condition, problem or diagnosis -->
+  </code>
+  <bodySite>
+    <!-- 0..* CodeableConcept Anatomical location, if relevant -->
+  </bodySite>
+  <subject>
+    <!-- 1..1 Reference(Patient|Group) Who has the condition? -->
+  </subject>
+  <context>
+    <!-- 0..1 Reference(Encounter|EpisodeOfCare) Encounter or episode when condition first asserted -->
+  </context>
+  <onset>
+    <!-- 0..1 dateTime|Age|Period|Range|string Estimated or actual date,  date-time, or age -->
+  </onset>
+  <abatement>
+    <!-- ?? 0..1 dateTime|Age|boolean|Period|Range|string If/when in resolution/remission -->
+  </abatement>
+  <assertedDate value="[dateTime]"/><!-- 0..1 Date record was believed accurate -->
+  <asserter>
+    <!-- 0..1 Reference(Practitioner|Patient|RelatedPerson) Person who asserts this condition -->
+  </asserter>
+  <stage>
+    <!-- 0..1 Stage/grade, usually assessed formally -->
+    <summary>
+      <!-- ?? 0..1 CodeableConcept Simple summary (disease specific) -->
+    </summary>
+    <assessment>
+      <!-- ?? 0..* Reference(ClinicalImpression|DiagnosticReport|Observation) Formal record of assessment -->
+    </assessment>
+  </stage>
+  <evidence>
+    <!-- 0..* Supporting evidence -->
+    <code>
+      <!-- ?? 0..* CodeableConcept Manifestation/symptom -->
+    </code>
+    <detail>
+      <!-- ?? 0..* Reference(Any) Supporting information found elsewhere -->
+    </detail>
+  </evidence>
+  <note>
+    <!-- 0..* Annotation Additional information about the Condition -->
+  </note>
+</Condition>

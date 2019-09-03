@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=”utf-8″>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/Scripts/MicrosoftTeams.min.js")
+
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top webheader" style="display:none;">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Partner Data Integration", "Index", "Patient", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid body-content">
+        @RenderBody()
+    </div>
+    <footer class="container-fluid webfooter" style="display:none;">
+        <p>&copy;@DateTime.Now.Year Dapasoft - Partner Data Integration</p>
+    </footer>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
+    @Html.Hidden("GLOBAL_WebPATH", Url.Content("~/"))
+    @Html.Hidden("WEB_LiveDataBaseUrl", Partner.Data.Integration.Utils.AppSettings.LiveDataBaseUrl)
+    @Html.Hidden("WEB_HistoricBaseUrl", Partner.Data.Integration.Utils.AppSettings.HistoricBaseUrl)
+    @Html.Hidden("WEB_DIImageBaseUrl", Partner.Data.Integration.Utils.AppSettings.DIImageBaseUrl)
+    @Html.Hidden("WEB_DICSImageStudyInstanceUID", Partner.Data.Integration.Utils.AppSettings.DICSImageStudyInstanceUID)
+    @Html.Hidden("WEB_DICSImageUserName", Partner.Data.Integration.Utils.AppSettings.DICSImageUserName)
+    @Html.Hidden("WEB_DICSImagePassword", Partner.Data.Integration.Utils.AppSettings.DICSImagePassword)
+</body>
+</html>

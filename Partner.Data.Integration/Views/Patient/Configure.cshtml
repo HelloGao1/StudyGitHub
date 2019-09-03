@@ -1,0 +1,73 @@
+﻿@model Partner.Data.Integration.Models.ConfigurationViewModel
+@{
+    ViewBag.Title = "Configure";
+}
+<h3>Configure your app here</h3>
+<div>
+    @using (Html.BeginForm("Configure", "Patient", FormMethod.Get, new { @id = "ConfigurationForm", @autocomplete = "off", @onsubmit = "return false" }))
+    {
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-12">
+                Field with * is required.
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(m => m.URL, new { @class = "control-label" }) *
+                    @Html.TextBoxFor(model => model.URL, new { @class = "form-control", @id = "txtUrl", placeholder = "Type URL" })
+                    @Html.ValidationMessageFor(model => model.URL)
+                </div>
+            </div>
+            <div class="col-md-6">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(m => m.TabName, new { @class = "control-label" }) *
+                    @Html.TextBoxFor(model => model.TabName, new { @class = "form-control", @id = "txtTabName", placeholder = "Type tab name" })
+                    @Html.ValidationMessageFor(model => model.TabName)
+                </div>
+            </div>
+            <div class="col-md-6">
+            </div>
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-default" onclick="onSave()"><i class="fa fa-save"></i>  OK</button>
+            </div>
+        </div>
+    }
+</div>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/Scripts/bootstrap-table.min.js")
+    <script type="text/javascript">
+        microsoftTeams.initialize();
+
+        microsoftTeams.settings.registerOnSaveHandler(function (saveEvent) {
+
+            var url = $("#txtUrl").val();
+            var tabName = $("#txtTabName").val();
+            microsoftTeams.settings.setSettings({
+                entityId: "partner.data.integration.patienttab",
+                contentUrl: url,
+                suggestedDisplayName: tabName,
+                websiteUrl: url
+            });
+
+            saveEvent.notifySuccess();
+        });
+
+        function onSave() {
+            var form = $("#ConfigurationForm");
+            if (form.valid()) {
+                microsoftTeams.settings.setValidityState(true);
+            }
+        }
+
+    </script>
+    }

@@ -1,0 +1,557 @@
+﻿@model Partner.Data.Integration.Models.PatientViewModel
+
+@{
+    ViewBag.Title = "Patient Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+*@
+@*
+<script src="~/signalr/hubs"></script>*@
+
+<link href="~/Content/toastr.min.css" rel="stylesheet" />
+
+<style>
+    body {
+        background-color: #fff;
+    }
+
+    #chartdiv {
+        width: 100%;
+        height: 700px;
+    }
+</style>
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-3" id="divLeftPanel" style="display:none;">
+            <div class="panel-group accordionMenu">
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab">
+                        <div class="panel-title" data-toggle="collapse" href="#collapse1-left">
+                            <span class="caret"></span> Profile
+                        </div>
+                    </div>
+                    <div id="collapse1-left" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            <div class="row">
+                                @Html.LabelFor(m => m.Id, new { @class = "col-md-4 control-label", @style = "font-weight:none;" })
+                                <div class="col-md-8">
+                                    @Html.DisplayFor(model => model.Id)
+                                </div>
+                            </div>
+                            <div class="row">
+                                @Html.LabelFor(m => m.Location, new { @class = "col-md-4 control-label" })
+                                <div class="col-md-8">
+                                    @Html.DisplayFor(model => model.Location)
+                                </div>
+                            </div>
+                            <div class="row">
+                                @Html.LabelFor(m => m.Payor, new { @class = "col-md-4 control-label" })
+                                <div class="col-md-8">
+                                    @Html.DisplayFor(model => model.Payor)
+                                </div>
+                            </div>
+                            <div class="row">
+                                @Html.LabelFor(m => m.FullName, new { @class = "col-md-4 control-label" })
+                                <div class="col-md-8">
+                                    @Html.DisplayFor(model => model.FullName, new { @id = "lbFullName" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                @Html.LabelFor(m => m.DOB, new { @class = "col-md-4 control-label" })
+                                <div class="col-md-8">
+                                    @Html.DisplayFor(model => model.DOBFormatted)
+                                </div>
+                            </div>
+                            <div class="row">
+                                @Html.LabelFor(m => m.Gender, new { @class = "col-md-4 control-label" })
+                                <div class="col-md-8">
+                                    @Html.DisplayFor(model => model.Gender)
+                                </div>
+                            </div>
+                            <div class="row">
+                                @Html.LabelFor(m => m.MRN, new { @class = "col-md-4 control-label" })
+                                <div class="col-md-8">
+                                    @Html.DisplayFor(model => model.MRN)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab">
+                        <div class="panel-title" data-toggle="collapse" href="#collapse2-left">
+                            <span class="caret"></span> Medications
+                        </div>
+                    </div>
+                    <div id="collapse2-left" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            @if (Model.PatientMedications.Count > 0)
+                            {
+                                foreach (var item in Model.PatientMedications)
+                                {
+                                    <div class="row form-group">
+                                        <div class="col-md-4">Drug Code:</div>
+                                        <div class="col-md-8">
+                                            @Html.DisplayFor(model => (item.Medication as CodeableConcept).Coding[0].Code)
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-4">
+                                            Drug Name:
+                                        </div>
+                                        <div class="col-md-8">
+                                            @Html.DisplayFor(model => (item.Medication as CodeableConcept).Coding[0].Display)
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-4">
+                                            DIN:&nbsp;
+                                        </div>
+                                        <div class="col-md-8">
+                                            @Html.DisplayFor(model => item.DosageInstruction[0].Route.Coding[0].Code)
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-4">
+                                            Dosage:&nbsp;
+                                        </div>
+                                        <div class="col-md-8">
+                                            @Html.DisplayFor(model => item.DosageInstruction[0].Text)
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-4">
+                                            Start Date:&nbsp;
+                                        </div>
+                                        <div class="col-md-8">
+                                            @Html.DisplayFor(model => (item.DosageInstruction[0].Timing.Repeat.Bounds as Period).Start)
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-md-4">
+                                            Max Days:&nbsp;
+                                        </div>
+                                        <div class="col-md-8">
+                                            @Html.DisplayFor(model => (DateTime.Parse((item.DosageInstruction[0].Timing.Repeat.Bounds as Period).End) - DateTime.Parse((item.DosageInstruction[0].Timing.Repeat.Bounds as Period).Start)).Days)
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div>
+                                    Not Available.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab">
+                        <div class="panel-title" data-toggle="collapse" href="#collapse3-left">
+                            <span class="caret"></span>  Vitals
+                        </div>
+                    </div>
+                    <div id="collapse3-left" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            @if (Model.PatientObservations.Count > 0)
+                            {
+                                foreach (var item in Model.PatientObservations)
+                                {
+                                    <div class="row form-group">
+                                        <div class="col-md-8">
+                                            @Html.DisplayFor(modelItem => item.Code.Coding[0].Display, new { @class = "control-label" }):
+                                        </div>
+                                        <div class="col-md-4">
+                                            @if (item.Value is Quantity)
+                                            {
+                                                @Html.DisplayFor(modelItem => (item.Value as Quantity).Value, new { @class = "control-label" })
+                                            }
+                                            else
+                                            {
+                                                @Html.DisplayFor(modelItem => (item.Value as FhirString).Value, new { @class = "control-label" })
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div>
+                                    Not Available.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab">
+                        <div class="panel-title" data-toggle="collapse" href="#collapse4-left">
+                            <span class="caret"></span> Allergy Intolerance
+                        </div>
+                    </div>
+                    <div id="collapse4-left" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            @if (Model.PatientAllergyIntolerances.Count > 0)
+                            {
+                                foreach (var item in Model.PatientAllergyIntolerances)
+                                {
+                                    <div class="form-group">
+                                        @*@Html.DisplayFor(modelItem => item.AssertedDate, new { @class = "control-label" }) -*@
+                                        @Html.DisplayFor(modelItem => item.Reaction[0].Substance.Text) &nbsp;&nbsp;
+                                        @*@Html.DisplayFor(modelItem => item.Reaction[0].Manifestation[0].Text)*@
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div>
+                                    Not Available.
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 tabbox" id="divRightPanel">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item active">
+                    <a class="nav-link" id="Clinical-tab" data-toggle="tab" href="#Clinical" role="tab">Clinical Data</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="liveData-tab" data-toggle="tab" href="#liveData" role="tab">Live Date</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="Historical-tab" data-toggle="tab" href="#Historical" role="tab">Historical Data</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="DIImage-tab" data-toggle="tab" href="#DIImage" role="tab">Cardiac Study</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane active" id="Clinical" role="tabpanel" aria-labelledby="Clinical-tab">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel-group accordionMenu">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab">
+                                        <div class="panel-title" data-toggle="collapse" href="#collapse1">
+                                            <span class="caret"></span> Profile
+                                        </div>
+                                    </div>
+                                    <div id="collapse1" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                @Html.LabelFor(m => m.Id, new { @class = "col-md-2 control-label", @style = "font-weight:none;" })
+                                                <div class="col-md-10">
+                                                    @Html.DisplayFor(model => model.Id)
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                @Html.LabelFor(m => m.Location, new { @class = "col-md-2 control-label" })
+                                                <div class="col-md-10">
+                                                    @Html.DisplayFor(model => model.Location)
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                @Html.LabelFor(m => m.Payor, new { @class = "col-md-2 control-label" })
+                                                <div class="col-md-10">
+                                                    @Html.DisplayFor(model => model.Payor)
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                @Html.LabelFor(m => m.FullName, new { @class = "col-md-2 control-label" })
+                                                <div class="col-md-10">
+                                                    @Html.DisplayFor(model => model.FullName, new { @id = "lbFullName" })
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                @Html.LabelFor(m => m.DOB, new { @class = "col-md-2 control-label" })
+                                                <div class="col-md-10">
+                                                    @Html.DisplayFor(model => model.DOBFormatted)
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                @Html.LabelFor(m => m.Gender, new { @class = "col-md-2 control-label" })
+                                                <div class="col-md-10">
+                                                    @Html.DisplayFor(model => model.Gender)
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                @Html.LabelFor(m => m.MRN, new { @class = "col-md-2 control-label" })
+                                                <div class="col-md-10">
+                                                    @Html.DisplayFor(model => model.MRN)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab">
+                                        <div class="panel-title" data-toggle="collapse" href="#collapse2">
+                                            <span class="caret"></span> Medications
+                                        </div>
+                                    </div>
+                                    <div id="collapse2" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            @if (Model.PatientMedications.Count > 0)
+                                            {
+                                                foreach (var item in Model.PatientMedications)
+                                                {
+                                                    <div class="row form-group">
+                                                        <div class="col-md-2">Drug Code:</div>
+                                                        <div class="col-md-10">
+                                                            @Html.DisplayFor(model => (item.Medication as CodeableConcept).Coding[0].Code)
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-2">
+                                                            Drug Name:
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            @Html.DisplayFor(model => (item.Medication as CodeableConcept).Coding[0].Display)
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-2">
+                                                            DIN:&nbsp;
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            @Html.DisplayFor(model => item.DosageInstruction[0].Route.Coding[0].Code)
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-2">
+                                                            Dosage:&nbsp;
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            @Html.DisplayFor(model => item.DosageInstruction[0].Text)
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-2">
+                                                            Start Date:&nbsp;
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            @Html.DisplayFor(model => (item.DosageInstruction[0].Timing.Repeat.Bounds as Period).Start)
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-md-2">
+                                                            Max Days:&nbsp;
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            @Html.DisplayFor(model => (DateTime.Parse((item.DosageInstruction[0].Timing.Repeat.Bounds as Period).End) - DateTime.Parse((item.DosageInstruction[0].Timing.Repeat.Bounds as Period).Start)).Days)
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div>
+                                                    Not Available.
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab">
+                                        <div class="panel-title" data-toggle="collapse" href="#collapse3">
+                                            <span class="caret"></span>  Vitals
+                                        </div>
+                                    </div>
+                                    <div id="collapse3" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            @if (Model.PatientObservations.Count > 0)
+                                            {
+                                                foreach (var item in Model.PatientObservations)
+                                                {
+                                                    <div class="row form-group">
+                                                        <div class="col-md-2">
+                                                            @Html.DisplayFor(modelItem => item.Code.Coding[0].Display, new { @class = "control-label" }):
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            @if (item.Value is Quantity)
+                                                            {
+                                                                @Html.DisplayFor(modelItem => (item.Value as Quantity).Value, new { @class = "control-label" })
+                                                            }
+                                                            else
+                                                            {
+                                                                @Html.DisplayFor(modelItem => (item.Value as FhirString).Value, new { @class = "control-label" })
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div>
+                                                    Not Available.
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab">
+                                        <div class="panel-title" data-toggle="collapse" href="#collapse4">
+                                            <span class="caret"></span> Allergy Intolerance
+                                        </div>
+                                    </div>
+                                    <div id="collapse4" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            @if (Model.PatientAllergyIntolerances.Count > 0)
+                                            {
+                                                foreach (var item in Model.PatientAllergyIntolerances)
+                                                {
+                                                    <div class="form-group">
+                                                        @*@Html.DisplayFor(modelItem => item.AssertedDate, new { @class = "control-label" }) -*@
+                                                        @Html.DisplayFor(modelItem => item.Reaction[0].Substance.Text) &nbsp;&nbsp;
+                                                        @*@Html.DisplayFor(modelItem => item.Reaction[0].Manifestation[0].Text)*@
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div>
+                                                    Not Available.
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="liveData" role="tabpanel" aria-labelledby="liveData-tab">
+                    <iframe id="liveDataFrame" frameborder="0" allowtransparency="true" style="width:100%; min-height:800px;overflow-x:hidden"></iframe>
+                </div>
+                <div class="tab-pane" id="Historical" role="tabpanel" aria-labelledby="Historical-tab">
+                    <iframe id="historicDataFrame" frameborder="0" allowtransparency="true" style="width:100%;  min-height:800px;"></iframe>
+                </div>
+                <div class="tab-pane" id="DIImage" role="tabpanel" aria-labelledby="DIImage-tab">
+                    <iframe id="DIImageFrame" frameborder="0" allowtransparency="true" style="width:100%;  min-height:800px;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*<div class="modal" id="patientModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Patient Sensor Connect</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Please input patient number to connect his/her live sensor data channel.</p>
+                <label for="txtPatientNumber">Patient Number:</label>
+                <input id="txtPatientNumber" type="text" value="@Model.FullName" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="connectPatient()">Connect</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+@Html.HiddenFor(model => model.FullName, new { @id = "txtFullName" })
+@Html.HiddenFor(model => model.FirstName, new { @id = "txtFirstName" })
+@Html.HiddenFor(model => model.LastName, new { @id = "txtLastName" })
+@Html.HiddenFor(model => model.CDRId, new { @id = "txtCDRId" })
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+<script src="~/Scripts/toastr.min.js"></script>
+<script type="text/javascript">
+    microsoftTeams.initialize();
+
+    var currentTabName = "#Clinical";
+    init();
+
+    function init() {
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var target = $(e.target).attr("href");
+            switch (target) {
+                case "#Clinical":
+                    $("#divLeftPanel").hide();
+                    $("#divRightPanel").addClass("col-md-12");
+                    $("#divRightPanel").removeClass("col-md-9");
+                    currentTabName = "#Clinical";
+                    break;
+                case "#liveData":
+                    if (currentTabName == "#Clinical") {
+                        $("#divLeftPanel").show();
+                        $("#divRightPanel").addClass("col-md-9");
+                        $("#divRightPanel").removeClass("col-md-12");
+                    }
+                    currentTabName = "#liveData";
+                    break;
+                case "#Historical":
+                    if (currentTabName == "#Clinical") {
+                        $("#divLeftPanel").show();
+                        $("#divRightPanel").addClass("col-md-9");
+                        $("#divRightPanel").removeClass("col-md-12");
+                    }
+                    currentTabName = "#Historical";
+                    break;
+                case "#DIImage":
+                    if (currentTabName == "#Clinical") {
+                        $("#divLeftPanel").show();
+                        $("#divRightPanel").addClass("col-md-9");
+                        $("#divRightPanel").removeClass("col-md-12");
+                    }
+                    currentTabName = "#DIImage";
+                    break;
+            }
+        });
+
+        setTimeout(setLiveDataSrc, 500);
+        setTimeout(setDIImageSrc, 10);
+        setTimeout(setHistoricSrc, 1000);
+        window.parent.hideLoading();
+    }
+
+    function setLiveDataSrc() {
+        var liveDataBaseUrl = $('#WEB_LiveDataBaseUrl').val();
+        var requestUrl = liveDataBaseUrl + "?patientId=" + $("#txtCDRId").val() + "&firstName=" + $("#txtFirstName").val() + "&lastName=" + $("#txtLastName").val();
+
+        $('#liveDataFrame').attr('src', requestUrl);
+    }
+
+    function setHistoricSrc() {
+        var historicDataBaseUrl = $('#WEB_HistoricBaseUrl').val();
+        var requestUrl = historicDataBaseUrl + "?patientId=" + $("#txtCDRId").val() + "&firstName=" + $("#txtFirstName").val() + "&lastName=" + $("#txtLastName").val();
+
+        $('#historicDataFrame').attr('src', requestUrl);
+    }
+
+    function setDIImageSrc() {
+        var patientId = $("#txtCDRId").val();
+        var DIImageBaseUrl = $('#WEB_DIImageBaseUrl').val();
+        if (DIImageBaseUrl.indexOf("=") !== -1) {
+            var urls = DIImageBaseUrl.split(';');
+            for (var i = 0; i < urls.length; i++) {
+                if (urls[i].indexOf(patientId + "=") !== -1) {
+                    DIImageBaseUrl = urls[i].replace(patientId + "=", "");
+                    break;
+                }
+            }
+        }
+        console.log(DIImageBaseUrl);
+        $('#DIImageFrame').attr('src', DIImageBaseUrl);
+    }
+
+</script>
+}

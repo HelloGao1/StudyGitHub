@@ -1,0 +1,112 @@
+﻿@model Partner.Data.Integration.Models.PatientSearchModel
+
+<div>
+    @using (Html.BeginForm("Search", "Patient", FormMethod.Post, new { @id = "SearchForm", @autocomplete = "off", @onsubmit = "return false" }))
+    {
+        <div id="divSearchName" class="searchDiv">
+            <div class="row">
+                <div class="col-md-12">
+                    Field with * is required, fill out DOB and three other fields to search.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Family, new { @class = "control-label" })
+                        @Html.TextBoxFor(model => model.Family, new { @class = "form-control", @id = "txtFamilyName", placeholder = "Type family name" })
+                        @Html.ValidationMessageFor(model => model.Family)
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Given, new { @class = "control-label" })
+                        @Html.TextBoxFor(model => model.Given, new { @class = "form-control", @id = "txtGivenName", placeholder = "Type give name" })
+                        @Html.ValidationMessageFor(model => model.Given)
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.DOB, new { @class = "control-label" }) *
+                        @Html.TextBoxFor(model => model.DOB, new { @class = "form-control datepicker", autocomplete = "off", @id = "txtDOB", placeholder = "yyyy-MM-dd", @name = "txtDOB" })
+
+                        @Html.ValidationMessageFor(model => model.DOB)
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Gender, new { @class = "control-label" })
+                        @Html.DropDownListFor(m => m.Gender, Model.GenderList, "--Select option--", new { @class = "form-control", @id = "ddlGender" })
+                        @Html.ValidationMessageFor(model => model.Gender)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group searchDiv" style="display: none;" id="divSearchMRN">
+            <div class="row">
+                <div class="col-md-12">
+                    Field with * is required.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.MRN, new { @class = "control-label" }) *
+                        @Html.TextBoxFor(model => model.MRN, new { @class = "form-control", @id = "txtMRN", placeholder = "Type MRN" })
+                        @Html.ValidationMessageFor(model => model.MRN)
+                    </div>
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+        </div>
+        <div class="form-group searchDiv" style="display: none;" id="divSearchId">
+            <div class="row">
+                <div class="col-md-12">
+                    Field with * is required.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Id, new { @class = "control-label" }) *
+                        @Html.TextBoxFor(model => model.Id, new { @class = "form-control", @id = "txtId", placeholder = "Type ID" })
+                        @Html.ValidationMessageFor(model => model.Id)
+                    </div>
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-default" onclick="onSearch()"><i class="fa fa-search"></i>  Search</button>
+            </div>
+        </div>
+    }
+    <br />
+    <table id="searchPatientList"
+            data-toggle="table"
+            data-show-columns="true"
+            data-height="300"
+            data-single-select="true"
+            data-click-to-select="true"
+            data-pagination="true"
+            data-page-size="10"
+            data-url="/Patient/SearchPatientList?id=0"
+           class="table table-striped" style="background-color:white;">
+        <thead>
+            <tr>
+                <th data-field="state" data-checkbox="true" class="hide"></th>
+                <th data-field="Id" data-sortable="true" data-width="30" data-width-unit="px">ID</th>
+                <th data-field="FullName" data-sortable="true">Name</th>
+                <th data-field="DOBFormatted" data-sortable="true">DOB</th>
+                <th data-field="Gender" data-sortable="true">Gender</th>
+                <th data-field="MRN" data-sortable="true">MRN</th>
+                <th data-field="Id" data-align="center" data-width="80" data-width-unit="px" data-formatter="editFormatter"></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
